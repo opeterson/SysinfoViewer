@@ -43,7 +43,7 @@ public class SensorView extends Activity {
         super.onStart();
 
         try {
-            resourceLocation = new URL(ServerUrlStorage.DEV_URL);
+            resourceLocation = new URL(ServerUrlStorage.PROD_URL);
         } catch (MalformedURLException mex) {
             Log.e(this.getClass().getName(), "The supplied URL is not valid! " + mex.getMessage());
         }
