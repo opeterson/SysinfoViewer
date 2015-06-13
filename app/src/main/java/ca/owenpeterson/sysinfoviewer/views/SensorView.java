@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.net.URL;
 import java.util.List;
 
 import ca.owenpeterson.sysinfoviewer.R;
@@ -21,6 +22,7 @@ public class SensorView extends Activity {
     private SysinfoStreamHandler handler;
     private SysinfoParser parser;
     private OnSensorsReadListener listener;
+    private URL resourceLoation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
