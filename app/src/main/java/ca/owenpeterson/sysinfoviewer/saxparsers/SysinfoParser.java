@@ -1,5 +1,7 @@
 package ca.owenpeterson.sysinfoviewer.saxparsers;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -11,34 +13,49 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import ca.owenpeterson.sysinfoviewer.listeners.OnSensorsRead;
+import ca.owenpeterson.sysinfoviewer.models.Adapter;
 import ca.owenpeterson.sysinfoviewer.saxhandlers.SysinfoStreamHandler;
 
 /**
+ * Sets up the SAX Parser for use against the sensors web service.
+ *
  * Created by owen on 6/13/15.
  */
-public class SysinfoParser extends AsyncTask<Void, Void, Void> {
+public class SysinfoParser extends AsyncTask<Void, Void, List<Adapter>> {
 
     private String feedURL;
     private SysinfoStreamHandler handler;
+    private ProgressDialog dialog;
+    private Context context;
+    private OnSensorsRead listener;
 
-    public SysinfoParser(String feedURL, SysinfoStreamHandler handler) {
+    public SysinfoParser(String feedURL, SysinfoStreamHandler handler, Context context, OnSensorsRead listener) {
         this.feedURL = feedURL;
         this.handler = handler;
+        this.context = context;
+        this.listener = listener;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        dialog = new ProgressDialog(context);
+        dialog.setMessage("Contacting Server");
+        dialog.show();
     }
 
     @Override
-    protected Void doInBackground(Void... params) {
-        URL feedLocation = null;
+    protected List<Adapter> doInBackground(Void... params) {
+        URL feedLocation;
+        List<Adapter> adapterList = new ArrayList<>();
         try {
             feedLocation = new URL("http://192.168.100.150:8080/sysinfo/system/sensors");
             BufferedReader in = new BufferedReader(new InputStreamReader(feedLocation.openStream()));
@@ -47,6 +64,8 @@ public class SysinfoParser extends AsyncTask<Void, Void, Void> {
             SAXParser sp = spf.newSAXParser();
 
             sp.parse(new InputSource(in), handler);
+
+            adapterList = handler.getAdapterList();
 
 
         } catch (MalformedURLException mex) {
@@ -58,11 +77,19 @@ public class SysinfoParser extends AsyncTask<Void, Void, Void> {
         } catch (SAXException saxex) {
             Log.d(this.getClass().getName(), "Could not create new sax parser. " + saxex.getMessage());
         }
-        return null;
+
+        return adapterList;
     }
 
     @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
+    protected void onPostExecute(List<Adapter> adapters)
+    {
+        super.onPostExecute(adapters);
+
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
+
+        listener.onSensorsRead();
     }
 }

@@ -2,15 +2,25 @@ package ca.owenpeterson.sysinfoviewer.views;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.List;
+
 import ca.owenpeterson.sysinfoviewer.R;
+import ca.owenpeterson.sysinfoviewer.listeners.OnSensorsRead;
+import ca.owenpeterson.sysinfoviewer.models.Adapter;
 import ca.owenpeterson.sysinfoviewer.saxhandlers.SysinfoStreamHandler;
 import ca.owenpeterson.sysinfoviewer.saxparsers.SysinfoParser;
 
 
 public class SensorView extends Activity {
+
+    private List<Adapter> adapterList;
+    private SysinfoStreamHandler handler;
+    private SysinfoParser parser;
+    private OnSensorsReadListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,11 +31,10 @@ public class SensorView extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        SysinfoStreamHandler handler = new SysinfoStreamHandler();
-        SysinfoParser parser = new SysinfoParser("", handler);
-
+        handler = new SysinfoStreamHandler();
+        listener = new OnSensorsReadListener();
+        parser = new SysinfoParser("", handler, this, listener);
         parser.execute();
-
     }
 
     @Override
@@ -48,5 +57,19 @@ public class SensorView extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private class OnSensorsReadListener implements OnSensorsRead {
+        @Override
+        public void onSensorsRead() {
+            adapterList = handler.getAdapterList();
+            buildAndPopulateView();
+
+            Log.d(this.getClass().getName(), "List of Adapters Loaded!");
+        }
+    }
+
+    private void buildAndPopulateView() {
+
     }
 }
