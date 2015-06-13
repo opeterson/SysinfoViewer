@@ -80,10 +80,6 @@ public class SensorView extends Activity {
         @Override
         public void onSensorsRead() {
             adapterList = handler.getAdapterList();
-
-            //temporarily add another adapter
-            adapterList.add(adapterList.get(0));
-
             Log.d(this.getClass().getName(), "List of Adapters Loaded!");
 
             buildAndPopulateView();
