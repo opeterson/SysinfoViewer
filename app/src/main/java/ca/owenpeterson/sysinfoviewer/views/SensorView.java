@@ -3,8 +3,10 @@ package ca.owenpeterson.sysinfoviewer.views;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import java.net.URL;
 import java.util.List;
@@ -23,11 +25,13 @@ public class SensorView extends Activity {
     private SysinfoParser parser;
     private OnSensorsReadListener listener;
     private URL resourceLoation;
+    private LinearLayout adapterPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensor_view);
+        adapterPane = (LinearLayout) findViewById(R.id.pane_adapters);
     }
 
     @Override
@@ -65,13 +69,23 @@ public class SensorView extends Activity {
         @Override
         public void onSensorsRead() {
             adapterList = handler.getAdapterList();
-            buildAndPopulateView();
-
             Log.d(this.getClass().getName(), "List of Adapters Loaded!");
+
+            buildAndPopulateView();
+            Log.d(this.getClass().getName(), "Layouts Built!");
         }
     }
 
     private void buildAndPopulateView() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (int i = 0; i < 5; i++) {
+            LinearLayout adapterLayout = (LinearLayout)  inflater.inflate(R.layout.adapter_layout, null, false);
 
+            for (int j = 0; j < 3; j++ ) {
+                LinearLayout temperatureLayout = (LinearLayout) inflater.inflate(R.layout.temperature_layout, null, false);
+                adapterLayout.addView(temperatureLayout);
+            }
+            adapterPane.addView(adapterLayout);
+        }
     }
 }
