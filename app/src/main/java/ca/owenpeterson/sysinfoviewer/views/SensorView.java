@@ -7,15 +7,19 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
 import ca.owenpeterson.sysinfoviewer.R;
 import ca.owenpeterson.sysinfoviewer.listeners.OnSensorsRead;
 import ca.owenpeterson.sysinfoviewer.models.Adapter;
+import ca.owenpeterson.sysinfoviewer.models.Temperature;
 import ca.owenpeterson.sysinfoviewer.saxhandlers.SysinfoStreamHandler;
 import ca.owenpeterson.sysinfoviewer.saxparsers.SysinfoParser;
+import ca.owenpeterson.sysinfoviewer.utils.ServerUrlStorage;
 
 
 public class SensorView extends Activity {
@@ -24,7 +28,7 @@ public class SensorView extends Activity {
     private SysinfoStreamHandler handler;
     private SysinfoParser parser;
     private OnSensorsReadListener listener;
-    private URL resourceLoation;
+    private URL resourceLocation;
     private LinearLayout adapterPane;
 
     @Override
@@ -37,9 +41,16 @@ public class SensorView extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        try {
+            resourceLocation = new URL(ServerUrlStorage.DEV_URL);
+        } catch (MalformedURLException mex) {
+            Log.e(this.getClass().getName(), "The supplied URL is not valid! " + mex.getMessage());
+        }
+
         handler = new SysinfoStreamHandler();
         listener = new OnSensorsReadListener();
-        parser = new SysinfoParser("", handler, this, listener);
+        parser = new SysinfoParser(resourceLocation, handler, this, listener);
         parser.execute();
     }
 
@@ -69,6 +80,10 @@ public class SensorView extends Activity {
         @Override
         public void onSensorsRead() {
             adapterList = handler.getAdapterList();
+
+            //temporarily add another adapter
+            adapterList.add(adapterList.get(0));
+
             Log.d(this.getClass().getName(), "List of Adapters Loaded!");
 
             buildAndPopulateView();
@@ -78,14 +93,43 @@ public class SensorView extends Activity {
 
     private void buildAndPopulateView() {
         LayoutInflater inflater = LayoutInflater.from(this);
-        for (int i = 0; i < 5; i++) {
+        for (Adapter adapter : adapterList) {
             LinearLayout adapterLayout = (LinearLayout)  inflater.inflate(R.layout.adapter_layout, null, false);
 
-            for (int j = 0; j < 3; j++ ) {
+            String adapterName = adapter.getName();
+            String adapterType = adapter.getType();
+
+            if (adapterName != null) {
+                TextView adapterNameView = (TextView) adapterLayout.findViewById(R.id.adapter_name);
+                adapterNameView.setText(adapterName);
+            }
+
+            if (adapterType != null) {
+                TextView adapterTypeView = (TextView) adapterLayout.findViewById(R.id.adapter_type);
+                adapterTypeView.setText(adapterType);
+            }
+
+            for (Temperature temperature : adapter.getTemperatures()) {
                 LinearLayout temperatureLayout = (LinearLayout) inflater.inflate(R.layout.temperature_layout, null, false);
+
+                String temperatureName = temperature.getName();
+                String temperatureValue = temperature.getValue();
+
+                if (temperatureName != null) {
+                    TextView temperatureNameView = (TextView) temperatureLayout.findViewById(R.id.temperature_name);
+                    temperatureNameView.setText(temperatureName);
+                }
+
+                if (temperatureValue != null) {
+                    TextView temperatureValueView = (TextView) temperatureLayout.findViewById(R.id.temperature_value);
+                    temperatureValueView.setText(temperatureValue);
+                }
+
                 adapterLayout.addView(temperatureLayout);
             }
+
             adapterPane.addView(adapterLayout);
+
         }
     }
 }

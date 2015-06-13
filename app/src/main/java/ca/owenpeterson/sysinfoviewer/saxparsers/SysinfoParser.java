@@ -31,14 +31,14 @@ import ca.owenpeterson.sysinfoviewer.saxhandlers.SysinfoStreamHandler;
  */
 public class SysinfoParser extends AsyncTask<Void, Void, List<Adapter>> {
 
-    private String feedURL;
+    private URL resourceLocaton;
     private SysinfoStreamHandler handler;
     private ProgressDialog dialog;
     private Context context;
     private OnSensorsRead listener;
 
-    public SysinfoParser(String feedURL, SysinfoStreamHandler handler, Context context, OnSensorsRead listener) {
-        this.feedURL = feedURL;
+    public SysinfoParser(URL resourceLocation, SysinfoStreamHandler handler, Context context, OnSensorsRead listener) {
+        this.resourceLocaton = resourceLocation;
         this.handler = handler;
         this.context = context;
         this.listener = listener;
@@ -54,11 +54,9 @@ public class SysinfoParser extends AsyncTask<Void, Void, List<Adapter>> {
 
     @Override
     protected List<Adapter> doInBackground(Void... params) {
-        URL feedLocation;
         List<Adapter> adapterList = new ArrayList<>();
         try {
-            feedLocation = new URL("http://192.168.100.150:8080/sysinfo/system/sensors");
-            BufferedReader in = new BufferedReader(new InputStreamReader(feedLocation.openStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(resourceLocaton.openStream()));
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
             SAXParser sp = spf.newSAXParser();

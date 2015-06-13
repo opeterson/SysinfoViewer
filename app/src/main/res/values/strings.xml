@@ -5,4 +5,6 @@
     <string name="action_settings">Settings</string>
     <string name="title">Server Sensors</string>
     <string name="title_adapters">Adapter List</string>
+    <string name="text_adapter_name">Adapter Name:</string>
+    <string name="text_adapter_type">Adapter Type:</string>
 </resources>
