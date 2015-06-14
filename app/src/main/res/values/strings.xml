@@ -7,4 +7,5 @@
     <string name="title_adapters">Adapter List</string>
     <string name="text_adapter_name">Adapter Name:</string>
     <string name="text_adapter_type">Adapter Type:</string>
+    <string name="action_refresh">Refresh</string>
 </resources>
