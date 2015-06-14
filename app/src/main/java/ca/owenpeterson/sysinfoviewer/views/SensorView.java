@@ -36,11 +36,6 @@ public class SensorView extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensor_view);
         adapterPane = (LinearLayout) findViewById(R.id.pane_adapters);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
 
         try {
             resourceLocation = new URL(ServerUrlStorage.getServerURL());
@@ -52,6 +47,11 @@ public class SensorView extends Activity {
         listener = new OnSensorsReadListener();
         parser = new SysinfoParser(resourceLocation, handler, this, listener);
         parser.execute();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     @Override
