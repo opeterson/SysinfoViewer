@@ -1,6 +1,8 @@
 package ca.owenpeterson.sysinfoviewer.views;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -82,8 +84,23 @@ public class SensorView extends Activity {
             adapterList = handler.getAdapterList();
             Log.d(this.getClass().getName(), "List of Adapters Loaded!");
 
-            buildAndPopulateView();
-            Log.d(this.getClass().getName(), "Layouts Built!");
+            if (adapterList != null && adapterList.size() > 0) {
+                buildAndPopulateView();
+                Log.d(this.getClass().getName(), "Layouts Built!");
+            } else {
+                //display a server connection error message.
+                AlertDialog.Builder builder = new AlertDialog.Builder(SensorView.this);
+                builder.setMessage("Failed to contact server. The server may be offline. Check your connection.")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
         }
     }
 
