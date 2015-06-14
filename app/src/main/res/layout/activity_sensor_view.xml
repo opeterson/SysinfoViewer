@@ -39,20 +39,22 @@
                     android:gravity="center"/>
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/text_adapter_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_adapters"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                android:layout_below="@id/pane_title"/>
+
             <LinearLayout
                 android:id="@+id/pane_adapters"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_below="@+id/pane_title">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_adapters"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="20dp"/>
+                android:layout_below="@+id/text_adapter_list">
             </LinearLayout>
         </RelativeLayout>
     </ScrollView>

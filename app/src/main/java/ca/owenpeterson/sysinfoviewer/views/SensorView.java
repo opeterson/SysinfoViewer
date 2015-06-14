@@ -47,8 +47,7 @@ public class SensorView extends Activity {
 
         handler = new SysinfoStreamHandler();
         listener = new OnSensorsReadListener();
-        parser = new SysinfoParser(resourceLocation, handler, this, listener);
-        parser.execute();
+        createAndExecuteParser();
     }
 
     @Override
@@ -76,6 +75,8 @@ public class SensorView extends Activity {
                 break;
             case R.id.action_refresh:
                 //reload the view
+                adapterPane.removeAllViews();
+                createAndExecuteParser();
                 break;
         }
 
@@ -148,5 +149,10 @@ public class SensorView extends Activity {
             adapterPane.addView(adapterLayout);
 
         }
+    }
+
+    private void createAndExecuteParser() {
+        parser = new SysinfoParser(resourceLocation, handler, this, listener);
+        parser.execute();
     }
 }
