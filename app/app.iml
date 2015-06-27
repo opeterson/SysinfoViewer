@@ -86,6 +86,8 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 22 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="SystemInfoServiceClient" level="project" />
+    <orderEntry type="library" exported="" name="1_SystemInfoServiceClient" level="project" />
     <orderEntry type="library" exported="" name="commons-lang-20030203.000129" level="project" />
   </component>
 </module>
