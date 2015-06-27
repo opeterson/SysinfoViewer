@@ -7,10 +7,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import ca.owenpeterson.sysinfoviewer.models.Sensors;
+import ca.owenpeterson.sysinfoviewer.utils.ServerUrlStorage;
 
 public class SystemInfoServiceImpl implements SystemInfoService {
 		
-	private static String RESOURCE_URL = "http://oapdev.sytes.net/sysinfo/system/sensors"; 
+	private static String RESOURCE_URL = ServerUrlStorage.getServerURL();
 	private RestTemplate restTemplate;
 	
 	public Sensors getSystemSensorInfo() {
