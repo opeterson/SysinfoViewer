@@ -11,27 +11,24 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import ca.owenpeterson.sysinfoviewer.R;
 import ca.owenpeterson.sysinfoviewer.listeners.OnSensorsRead;
 import ca.owenpeterson.sysinfoviewer.models.Adapter;
+import ca.owenpeterson.sysinfoviewer.models.AdapterList;
+import ca.owenpeterson.sysinfoviewer.models.Sensors;
 import ca.owenpeterson.sysinfoviewer.models.Temperature;
-import ca.owenpeterson.sysinfoviewer.saxhandlers.SysinfoStreamHandler;
-import ca.owenpeterson.sysinfoviewer.saxparsers.SysinfoParser;
-import ca.owenpeterson.sysinfoviewer.utils.ServerUrlStorage;
-
+import ca.owenpeterson.sysinfoviewer.models.TemperatureList;
+import ca.owenpeterson.sysinfoviewer.service.ServiceContact;
 
 public class SensorView extends Activity {
 
     private List<Adapter> adapterList;
-    private SysinfoStreamHandler handler;
-    private SysinfoParser parser;
     private OnSensorsReadListener listener;
-    private URL resourceLocation;
     private LinearLayout adapterPane;
+    private ServiceContact contact;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,15 +36,13 @@ public class SensorView extends Activity {
         setContentView(R.layout.activity_sensor_view);
         adapterPane = (LinearLayout) findViewById(R.id.pane_adapters);
 
-        try {
-            resourceLocation = new URL(ServerUrlStorage.getServerURL());
-        } catch (MalformedURLException mex) {
-            Log.e(this.getClass().getName(), "The supplied URL is not valid! " + mex.getMessage());
-        }
-
-        handler = new SysinfoStreamHandler();
         listener = new OnSensorsReadListener();
-        createAndExecuteParser();
+        contactService();
+    }
+
+    private void contactService() {
+        contact = new ServiceContact(listener, this);
+        contact.execute();
     }
 
     @Override
@@ -76,7 +71,7 @@ public class SensorView extends Activity {
             case R.id.action_refresh:
                 //reload the view
                 adapterPane.removeAllViews();
-                createAndExecuteParser();
+                contactService();
                 break;
         }
 
@@ -86,12 +81,28 @@ public class SensorView extends Activity {
     private class OnSensorsReadListener implements OnSensorsRead {
         @Override
         public void onSensorsRead() {
-            adapterList = handler.getAdapterList();
-            Log.d(this.getClass().getName(), "List of Adapters Loaded!");
+            Sensors sensors = null;
+            try {
+                sensors = contact.get();
+            } catch (InterruptedException ex) {
+                Log.e(this.getClass().getName(), ex.getMessage());
+            } catch (ExecutionException eex) {
+                Log.e(this.getClass().getName(), eex.getMessage());
+            }
 
-            if (adapterList != null && adapterList.size() > 0) {
-                buildAndPopulateView();
-                Log.d(this.getClass().getName(), "Layouts Built!");
+            Log.d(this.getClass().getName(), "Sensor information Loaded!");
+
+            if (sensors != null) {
+
+                AdapterList sensorsAdapterList = sensors.getAdapters();
+                if (sensorsAdapterList != null) {
+                    adapterList = sensorsAdapterList.getAdapters();
+                }
+
+                if (adapterList != null && adapterList.size() > 0) {
+                    buildAndPopulateView();
+                    Log.d(this.getClass().getName(), "Layouts Built!");
+                }
             } else {
                 //display a server connection error message.
                 AlertDialog.Builder builder = new AlertDialog.Builder(SensorView.this);
@@ -127,32 +138,33 @@ public class SensorView extends Activity {
                 adapterTypeView.setText(adapterType);
             }
 
-            for (Temperature temperature : adapter.getTemperatures()) {
-                LinearLayout temperatureLayout = (LinearLayout) inflater.inflate(R.layout.temperature_layout, null, false);
+            TemperatureList adapterTemperatureList = adapter.getTemperatures();
 
-                String temperatureName = temperature.getName();
-                String temperatureValue = temperature.getValue();
+            if (adapterTemperatureList != null) {
+                List<Temperature> temperatureList = adapterTemperatureList.getTemperatures();
 
-                if (temperatureName != null) {
-                    TextView temperatureNameView = (TextView) temperatureLayout.findViewById(R.id.temperature_name);
-                    temperatureNameView.setText(temperatureName);
+                for (Temperature temperature : temperatureList) {
+                    LinearLayout temperatureLayout = (LinearLayout) inflater.inflate(R.layout.temperature_layout, null, false);
+
+                    String temperatureName = temperature.getName();
+                    String temperatureValue = temperature.getValue();
+
+                    if (temperatureName != null) {
+                        TextView temperatureNameView = (TextView) temperatureLayout.findViewById(R.id.temperature_name);
+                        temperatureNameView.setText(temperatureName);
+                    }
+
+                    if (temperatureValue != null) {
+                        TextView temperatureValueView = (TextView) temperatureLayout.findViewById(R.id.temperature_value);
+                        temperatureValueView.setText(temperatureValue);
+                    }
+
+                    adapterLayout.addView(temperatureLayout);
                 }
-
-                if (temperatureValue != null) {
-                    TextView temperatureValueView = (TextView) temperatureLayout.findViewById(R.id.temperature_value);
-                    temperatureValueView.setText(temperatureValue);
-                }
-
-                adapterLayout.addView(temperatureLayout);
             }
 
             adapterPane.addView(adapterLayout);
 
         }
-    }
-
-    private void createAndExecuteParser() {
-        parser = new SysinfoParser(resourceLocation, handler, this, listener);
-        parser.execute();
     }
 }
