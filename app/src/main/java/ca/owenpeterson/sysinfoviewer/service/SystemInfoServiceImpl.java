@@ -1,6 +1,9 @@
 package ca.owenpeterson.sysinfoviewer.service;
 
+import android.util.Log;
+
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -24,11 +27,15 @@ public class SystemInfoServiceImpl implements SystemInfoService {
 			resourceLocation = new URI(RESOURCE_URL);
 			
 		} catch (URISyntaxException ex) {
-			System.out.println(ex.getMessage());
+			Log.e(this.getClass().getName(), ex.getMessage());
 		}
 		
 		if (resourceLocation != null) {
-			sensors = restTemplate.getForObject(resourceLocation, Sensors.class);
+			try {
+				sensors = restTemplate.getForObject(resourceLocation, Sensors.class);
+			} catch (RestClientException rex) {
+				Log.e(this.getClass().getName(), "Caught Rest Client Exception. This is likely due to network connectivity problems. \n" + rex.getMessage());
+			}
 		}
 		
 		return sensors;
