@@ -25,7 +25,7 @@ import ca.owenpeterson.sysinfoviewer.service.ServiceContact;
 
 public class SensorView extends Activity {
 
-    private List<Adapter> adapterList;
+    //private List<Adapter> adapterList;
     private OnSensorsReadListener listener;
     private LinearLayout adapterPane;
     private ServiceContact contact;
@@ -82,6 +82,8 @@ public class SensorView extends Activity {
         @Override
         public void onSensorsRead() {
             Sensors sensors = null;
+            List<Adapter> adapterList = null;
+            String requestDate = "";
             try {
                 sensors = contact.get();
             } catch (InterruptedException ex) {
@@ -94,13 +96,15 @@ public class SensorView extends Activity {
 
             if (sensors != null) {
 
+                requestDate = sensors.getRequestDate();
                 AdapterList sensorsAdapterList = sensors.getAdapters();
+
                 if (sensorsAdapterList != null) {
                     adapterList = sensorsAdapterList.getAdapters();
                 }
 
                 if (adapterList != null && adapterList.size() > 0) {
-                    buildAndPopulateView();
+                    buildAndPopulateView(requestDate, adapterList);
                     Log.d(this.getClass().getName(), "Layouts Built!");
                 }
             } else {
@@ -120,7 +124,10 @@ public class SensorView extends Activity {
         }
     }
 
-    private void buildAndPopulateView() {
+    private void buildAndPopulateView(String requestDate, List<Adapter> adapterList) {
+        TextView tv_requestDate = (TextView) findViewById(R.id.request_date);
+        tv_requestDate.setText(requestDate);
+
         LayoutInflater inflater = LayoutInflater.from(this);
         for (Adapter adapter : adapterList) {
             LinearLayout adapterLayout = (LinearLayout)  inflater.inflate(R.layout.adapter_layout, null, false);
